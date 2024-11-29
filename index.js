@@ -1,8 +1,19 @@
-               require("dotenv").config();
-
-
+require("dotenv").config();
 const express = require("express");
 const app = express();
+const bd = require("./bd");
+
+app.use(express.json());
+
+app.get("/clientes/:id", (request, response) => {
+    const id = request.params.id;
+    response.json(bd.ListaClientes(id));
+});
+
+app.get("/clientes", (request,response) => {
+    const clientes = request.body;
+    bd.inserir
+});
 
 app.get("/clientes", (request, response) => {
     response.json(bd.RetornaClientes());
