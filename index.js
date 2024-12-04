@@ -27,6 +27,91 @@ app.get("/produtos", (req, res) => {
     res.json(produtos);
 });
 
+// Rota para consultar um produto pelo ID
+app.get("/produtos/:id", (req, res) => {
+    const id = parseInt(req.params.id); // Obtém o ID da URL e converte para número
+    const produto = produtos.find((p) => p.id === id); // Busca o produto no vetor
+
+    if (produto) {
+        res.json(produto); // Retorna o produto encontrado
+    } else {
+        res.status(404).json({ error: "Produto não encontrado" }); // Retorna erro se não achar
+    }
+});
+
+// Rota para inserir um novo produto
+app.post("/produtos", (req, res) => {
+    const { id, nome, quantidade, preco } = req.body; // Desestrutura os dados do corpo da requisição
+
+    // Validações simples
+    if (!id || !nome || quantidade === undefined || preco === undefined) {
+        return res.status(400).json({ error: "Todos os campos são obrigatórios: id, nome, quantidade, preco" });
+    }
+
+    // Verifica se o ID já existe
+    const produtoExistente = produtos.find((p) => p.id === id);
+    if (produtoExistente) {
+        return res.status(400).json({ error: "Produto com esse ID já existe" });
+    }
+
+    // Cria o novo produto
+    const novoProduto = { id, nome, quantidade, preco };
+
+    // Adiciona ao vetor
+    produtos.push(novoProduto);
+
+    // Retorna o produto criado
+    res.status(201).json(novoProduto);
+});
+
+// Rota para alterar os dados de um produto pelo ID
+app.put("/produtos/:id", (req, res) => {
+    const id = parseInt(req.params.id); // Obtém o ID do produto a ser alterado
+    const { nome, quantidade, preco } = req.body; // Dados enviados para alteração
+
+    // Encontra o índice do produto no vetor
+    const indice = produtos.findIndex((p) => p.id === id);
+
+    if (indice === -1) {
+        return res.status(404).json({ error: "Produto não encontrado" }); // Retorna erro se não encontrar
+    }
+
+    // Validações simples
+    if (!nome && quantidade === undefined && preco === undefined) {
+        return res.status(400).json({ error: "Nenhum dado para atualizar" });
+    }
+
+    // Atualiza os campos enviados no corpo da requisição
+    if (nome) produtos[indice].nome = nome;
+    if (quantidade !== undefined) produtos[indice].quantidade = quantidade;
+    if (preco !== undefined) produtos[indice].preco = preco;
+
+    // Retorna o produto atualizado
+    res.json(produtos[indice]);
+});
+
+// Rota para deletar um produto pelo ID
+app.delete("/produtos/:id", (req, res) => {
+    const id = parseInt(req.params.id); // Captura o ID do produto da URL
+
+    // Encontra o índice do produto no vetor
+    const indice = produtos.findIndex((p) => p.id === id);
+
+    if (indice === -1) {
+        return res.status(404).json({ error: "Produto não encontrado" }); // Retorna erro se o produto não for encontrado
+    }
+
+    // Remove o produto do vetor
+    const produtoRemovido = produtos.splice(indice, 1);
+
+    // Retorna o produto que foi removido
+    res.json({
+        message: "Produto removido com sucesso",
+        produto: produtoRemovido[0],
+    });
+});
+
+
 // Rota para buscar cliente por ID
 app.get("/clientes/:id", (request, response) => {
     const id = request.params.id;
