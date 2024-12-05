@@ -1,34 +1,44 @@
-const clientes = [
-    {
-        id:1,
-        Nome:"Nataka tushia",
-        Profissao:"Programadora",
-        Altura: 1.50
-    },
+const mysql = require("mysql2/promise");
 
-    {
-        id:2,
-        Nome:"Lima Maria",
-        Profissao:"General",
-        Altura: 1.90
+// Criação da pool de conexões com o banco de dados
+const conexao = mysql.createPool(process.env.CONNECTION_STRING);
+
+// Função para inserir um cliente
+async function inserirCliente(cliente) {
+    try {
+        const { nome, email, telefone } = cliente; // Exemplo de campos
+        const query = "INSERT INTO cliente (nome, email, telefone) VALUES (?, ?, ?);";
+        const [resultado] = await conexao.query(query, [nome, email, telefone]);
+        return {
+            id: resultado.insertId,
+            ...cliente,
+        };
+    } catch (erro) {
+        console.error("Erro ao inserir cliente:", erro.message);
+        throw erro;
     }
-];
-
-function inserirclientes(clientes){
-    //funcao para adicionar novo elemento no vetor
-    
 }
 
-function ListaClientes(id) {
-    return clientes.find(c => c.id == id);
+// Função para listar clientes, com ou sem filtro por ID
+async function ListaClientes(id = null) {
+    try {
+        if (id) {
+            const query = "SELECT * FROM cliente WHERE id = ?;";
+            const [resultado] = await conexao.query(query, [id]);
+            return resultado;
+        } else {
+            const query = "SELECT * FROM cliente;";
+            const [resultado] = await conexao.query(query);
+            return resultado;
+        }
+    } catch (erro) {
+        console.error("Erro ao listar clientes:", erro.message);
+        throw erro;
+    }
 }
 
-function RetornaClientes() {
-    return clientes;
-}
-
-//Comando para exportar as funcoes lidas nesse arquivo
+// Exporta as funções do módulo
 module.exports = {
-    RetornaClientes,
-    ListaClientes
-}
+    inserirCliente,
+    ListaClientes,
+};

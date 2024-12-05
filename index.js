@@ -112,31 +112,41 @@ app.delete("/produtos/:id", (req, res) => {
 });
 
 
-// Rota para buscar cliente por ID
-app.get("/clientes/:id", (request, response) => {
-    const id = request.params.id;
-    const cliente = bd.ListaClientes(id); // Supondo que esta função existe no arquivo bd.js
-    if (cliente) {
-        response.json(cliente);
-    } else {
-        response.status(404).json({ error: "Cliente não encontrado" });
+
+app.get("/clientes/:id", async (req, res) => {
+    try {
+        const id = parseInt(req.params.id);
+        const cliente = await bd.ListaClientes(id);
+
+        if (cliente.length === 0) {
+            return res.status(404).json({ error: "Cliente não encontrado" });
+        }
+
+        res.json(cliente[0]);
+    } catch (erro) {
+        res.status(500).json({ error: "Erro ao buscar cliente" });
     }
 });
 
-// Rota para listar todos os clientes
-app.get("/clientes", (request, response) => {
-    const clientes = bd.RetornaClientes(); // Supondo que esta função existe no arquivo bd.js
-    response.json(clientes);
+app.get("/clientes", async (req, res) => {
+    try {
+        const clientes = await bd.ListaClientes();
+        res.json(clientes);
+    } catch (erro) {
+        res.status(500).json({ error: "Erro ao listar clientes" });
+    }
 });
 
-// Rota para inserir cliente (usando POST)
-app.post("/clientes", (request, response) => {
-    const novoCliente = request.body;
-    if (!novoCliente || !novoCliente.nome || !novoCliente.idade) {
-        return response.status(400).json({ error: "Dados inválidos" });
+const bd = require("./bd");
+
+app.post("/clientes", async (req, res) => {
+    try {
+        const cliente = req.body;
+        const novoCliente = await bd.inserirCliente(cliente);
+        res.status(201).json(novoCliente);
+    } catch (erro) {
+        res.status(500).json({ error: "Erro ao inserir cliente" });
     }
-    const clienteInserido = bd.inserir(novoCliente); // Supondo que bd.inserir existe
-    response.status(201).json(clienteInserido);
 });
 
 // Inicialização do servidor
