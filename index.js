@@ -112,7 +112,6 @@ app.delete("/produtos/:id", (req, res) => {
 });
 
 
-
 app.get("/clientes/:id", async (req, res) => {
     try {
         const id = parseInt(req.params.id);
@@ -137,7 +136,7 @@ app.get("/clientes", async (req, res) => {
     }
 });
 
-const bd = require("./bd");
+//const bd = require("./bd");
 
 app.post("/clientes", async (req, res) => {
     try {
